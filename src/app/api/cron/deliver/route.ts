@@ -6,6 +6,7 @@
 //   if(!secret||request.headers.get("authorization")!==`Bearer ${secret}`)return NextResponse.json({error:"Unauthorized"},{status:401});
 //   try{await connectDB();const delivered=await deliverDueLetters();const reminders=await sendWritingReminders();return NextResponse.json({ok:true,delivered,reminders});}
 //   catch(error){console.error("Scheduled delivery failed",error);return NextResponse.json({error:"Delivery job failed"},{status:503});}
+// }
 
 import { NextResponse } from 'next/server';
 
@@ -44,5 +45,4 @@ export async function GET(request: Request) {
     console.error('Fatal error executing cron delivery:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-}
 }
