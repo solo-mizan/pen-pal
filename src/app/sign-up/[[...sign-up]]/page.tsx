@@ -1,0 +1,3 @@
+import { SignUp } from "@clerk/nextjs";
+import Link from "next/link";
+export default function SignUpPage() { if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) return <main className="auth-needed"><span>✉</span><h1>Your mailbox is almost ready.</h1><p>Add the Clerk keys from `.env.example` to `.env.local` to enable sign-up.</p><Link className="button" href="/">Back home</Link></main>; return <div className="auth-page"><div className="auth-intro"><Link className="brand" href="/"><span className="brand-mark">✉</span> dear, <i>letter</i></Link><h1>A mailbox of<br/><em>your very own.</em></h1><p>Start with one person. Write when you have something to say.</p></div><SignUp routing="hash" /></div>; }
