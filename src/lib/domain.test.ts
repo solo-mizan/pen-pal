@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canAccessLetterPhotos, canRecipientOpenLetter, deliveryDelayDays } from "./domain";
+import { canAccessLetterPhotos, canRecipientOpenLetter, deliveryDelayDays, profileUsernameBase, usernameAttempt } from "./domain";
 import { letterSchema } from "./validators";
 import { formatLocalDate } from "./dates";
 
@@ -45,5 +45,22 @@ describe("local date formatting", () => {
     const timestamp = "2026-01-01T01:00:00.000Z";
     expect(formatLocalDate(timestamp, "Asia/Dhaka", { month: "short", day: "numeric" })).toMatch(/Jan.*1|1.*Jan/);
     expect(formatLocalDate(timestamp, "America/Los_Angeles", { month: "short", day: "numeric" })).toMatch(/Dec.*31|31.*Dec/);
+  });
+});
+
+describe("new profile usernames", () => {
+  it("normalizes short or empty names into valid bases", () => {
+    expect(profileUsernameBase("Jo", null)).toBe("jouser");
+    expect(profileUsernameBase(null, "Li")).toBe("liuser");
+    expect(profileUsernameBase(null, "!!!")).toBe("frienduser");
+  });
+  it("makes stable per-account usernames with room for collision retries", () => {
+    const base = profileUsernameBase("averylongusernameexceeding", null);
+    const first = usernameAttempt(base, "user_first", 0);
+    const second = usernameAttempt(base, "user_second", 0);
+    expect(first).not.toBe(second);
+    expect(first.length).toBeLessThanOrEqual(24);
+    expect(usernameAttempt(base, "user_first", 4)).not.toBe(first);
+    expect(usernameAttempt(base, "user_first", 99).length).toBeLessThanOrEqual(24);
   });
 });
