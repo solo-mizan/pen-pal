@@ -11,5 +11,8 @@
   .admin-mode{align-items:flex-start;flex-direction:column}
   .admin-range{flex-wrap:wrap}
   .admin-actions{align-items:flex-start;flex-direction:column}
-  .mail-sidebar{grid-template-columns:1fr repeat(5,auto)}
+  .mail-sidebar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:12px 14px}
+  .mail-sidebar .brand{flex:1 0 100%;margin:0 0 6px}
+  .mail-sidebar .side-link{flex:1 1 auto;justify-content:center;min-width:0;white-space:normal;padding:8px 5px;font-size:10px}
+  .mail-sidebar .side-link svg{flex:none;width:15px;height:15px}
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { deliverDueLetters } from "@/lib/delivery";
+import { deliverDueLetters, sendWritingReminders } from "@/lib/delivery";
 
 export async function GET(request: Request) {
   const expectedToken = process.env.CRON_SECRET;
@@ -15,7 +15,8 @@ export async function GET(request: Request) {
   try {
     await connectDB();
     const delivered = await deliverDueLetters();
-    return NextResponse.json({ success: true, delivered, timestamp: new Date().toISOString() });
+    const reminders = await sendWritingReminders();
+    return NextResponse.json({ success: true, delivered, reminders, timestamp: new Date().toISOString() });
   } catch (error) {
     console.error("Cron delivery failed:", error);
     return NextResponse.json({ error: "Delivery processing failed." }, { status: 503 });

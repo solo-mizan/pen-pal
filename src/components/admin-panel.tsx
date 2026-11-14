@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { processDueLettersNow, saveGlobalDeliverySettings } from "@/actions/admin";
 import type { DeliverySettings } from "@/lib/domain";
 import { finishTopLoading, startTopLoading } from "@/lib/top-loading";
+import { showToast } from "@/lib/toast";
 
 type AdminStats = { users: number; scheduled: number; overdue: number; delivered: number; pendingConnections: number };
 
@@ -13,20 +14,18 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
   const [mode, setMode] = useState(settings.mode);
   const [minDays, setMinDays] = useState(settings.minDays);
   const [maxDays, setMaxDays] = useState(settings.maxDays);
-  const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setStatus("");
     startTopLoading();
     try {
       const result = await saveGlobalDeliverySettings({ mode, minDays, maxDays });
-      setStatus(result.ok ? "Delivery timing saved for new letters." : result.error || "Could not save settings.");
+      showToast(result.ok ? "Delivery timing saved for new letters." : result.error || "Could not save settings.", result.ok ? "success" : "error");
       if (result.ok) router.refresh();
     } catch {
-      setStatus("Could not save settings. Please try again.");
+      showToast("Could not save settings. Please try again.", "error");
     } finally {
       setBusy(false);
       finishTopLoading();
@@ -35,14 +34,13 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
 
   async function processDue() {
     setBusy(true);
-    setStatus("");
     startTopLoading();
     try {
       const result = await processDueLettersNow();
-      setStatus(result.ok ? `Processed ${result.delivered} due ${result.delivered === 1 ? "letter" : "letters"}.` : result.error || "Could not process deliveries.");
+      showToast(result.ok ? `Processed ${result.delivered} due ${result.delivered === 1 ? "letter" : "letters"}.` : result.error || "Could not process deliveries.", result.ok ? "success" : "error");
       if (result.ok) router.refresh();
     } catch {
-      setStatus("Could not process deliveries. Please try again.");
+      showToast("Could not process deliveries. Please try again.", "error");
     } finally {
       setBusy(false);
       finishTopLoading();
@@ -73,7 +71,7 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
         <label>Longest delay (days)<input type="number" min={0} max={30} step={1} value={maxDays} onChange={event => setMaxDays(Number(event.target.value))} required /></label>
       </div>}
       {minDays > maxDays && <p className="admin-error" role="alert">The shortest delay must not exceed the longest delay.</p>}
-      <div className="admin-actions"><button className="button" disabled={busy || (mode === "random" && minDays > maxDays)}>{busy ? "Saving…" : "Save delivery timing"}</button>{status && <span role="status">{status}</span>}</div>
+      <div className="admin-actions"><button className="button" disabled={busy || (mode === "random" && minDays > maxDays)}>{busy ? "Saving…" : "Save delivery timing"}</button></div>
     </form>
 
     <section className="admin-card admin-operations">

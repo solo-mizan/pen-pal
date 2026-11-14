@@ -8,8 +8,8 @@ A quiet, postal-inspired letter exchange built with the Next.js App Router. Lett
 - Clerk for email/password, email verification, and Google sign-in. This checkout is linked to the selected `pen-pal` development application, where these methods are enabled.
 - MongoDB Atlas with Mongoose
 - Cloudinary authenticated assets for private photographs
-- Resend for arrival email
-- Vercel Cron every 15 minutes, plus an overdue-delivery fallback on mailbox and letter access
+- Resend for connection, arrival, and opted-in writing-reminder emails
+- GitHub Actions delivery/reminder trigger every 15 minutes, plus an overdue-delivery fallback on mailbox and letter access
 
 ## Run locally
 
@@ -39,7 +39,7 @@ Run `npm test` for unit checks covering the 3–7 day delay, Unicode Bangla/Engl
 | `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | Post-auth destination. |
 | `MONGODB_URI` | MongoDB Atlas connection. |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Signed authenticated uploads and short-lived private downloads. |
-| `RESEND_API_KEY`, `EMAIL_FROM` | Optional transactional arrival email. |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Optional transactional connection, arrival, and writing-reminder emails. |
 | `NEXT_PUBLIC_APP_URL` | Absolute mailbox link in emails. |
 | `CRON_SECRET` | Protects the scheduled delivery handler with a bearer token. |
 
@@ -65,7 +65,7 @@ src/lib/domain.test.ts    Vitest business rule checks
 
 ## Delayed delivery and privacy
 
-`sendLetter` validates the payload and accepted connection on the server, then uses the global delivery policy configured in the admin panel (defaults to a random 3–7 days) to calculate `deliverAt` from server UTC time. Instant mode runs the same due-letter processor immediately. A conditional MongoDB update changes only scheduled letters whose `deliverAt` has passed; it writes `deliveredAt` and an arrival notification only once, so overlapping cron invocations are safe. The GitHub Actions workflow calls `/api/cron/deliver` every 15 minutes. The mailbox and letter-reading path also processes overdue deliveries if cron was delayed. Letter reading queries require the authenticated intended recipient and delivered status. Admin policy changes affect new letters; existing scheduled letters keep their stored arrival time.
+`sendLetter` validates the payload and accepted connection on the server, then uses the global delivery policy configured in the admin panel (defaults to a random 3–7 days) to calculate `deliverAt` from server UTC time. Instant mode runs the same due-letter processor immediately. A conditional MongoDB update changes only scheduled letters whose `deliverAt` has passed; it writes `deliveredAt` and an arrival notification only once, so overlapping cron invocations are safe. The GitHub Actions workflow calls `/api/cron/deliver` every 15 minutes; the route processes due letters and opted-in writing reminders. The mailbox and letter-reading path also processes overdue deliveries if cron was delayed. Letter reading queries require the authenticated intended recipient and delivered status. Admin policy changes affect new letters; existing scheduled letters keep their stored arrival time.
 
 Cloudinary uploads use a server-generated public ID, a signed authenticated asset type, server-enforced format and 10 MB limits, and an owner ID context. Dispatch checks each asset against Cloudinary’s authenticated Admin API and the sender ID. The photos endpoint checks letter participation and delivery before generating a five-minute private download URL. Letter bodies and attachment IDs are never sent to recipients before delivery.
 
@@ -74,7 +74,7 @@ Cloudinary uploads use a server-generated public ID, a signed authenticated asse
 1. Push this folder to a Git repository and import it into Vercel.
 2. Add the variables from `.env.example` in the Vercel project settings; use a long random `CRON_SECRET` and set `NEXT_PUBLIC_APP_URL` to the production domain.
 3. Add that domain to Clerk and Cloudinary configuration, and verify the `EMAIL_FROM` sender domain in Resend.
-4. Deploy. Vercel reads `vercel.json` and schedules the delivery endpoint. Confirm your Vercel plan supports the selected cron frequency.
+4. Deploy. The GitHub Actions workflow in `.github/workflows/cron.yml` calls the protected delivery endpoint every 15 minutes. Confirm scheduled workflows are enabled for the repository and that the deployed `CRON_SECRET` matches the workflow configuration.
 5. Restrict MongoDB Atlas network access to your deployment environment where practical and use production Clerk keys.
 
 ## Current implementation notes

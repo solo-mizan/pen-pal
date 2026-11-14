@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updatePreferences } from "@/actions/mail";
 import { finishTopLoading, startTopLoading } from "@/lib/top-loading";
+import { showToast } from "@/lib/toast";
 
 type FormState = {
   displayName: string;
@@ -17,7 +18,6 @@ type FormState = {
 
 export default function SettingsForm({ initial }: { initial: FormState }) {
   const [form, setForm] = useState(initial);
-  const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
   function text(field: "displayName" | "username" | "timezone", value: string) {
@@ -31,13 +31,12 @@ export default function SettingsForm({ initial }: { initial: FormState }) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
-    setStatus("");
     startTopLoading();
     try {
       const result = await updatePreferences(form);
-      setStatus(result.ok ? "Your mailbox settings are tucked away safely." : result.error || "Could not save settings.");
+      showToast(result.ok ? "Your mailbox settings are tucked away safely." : result.error || "Could not save settings.", result.ok ? "success" : "error");
     } catch {
-      setStatus("Could not save settings. Please try again.");
+      showToast("Could not save settings. Please try again.", "error");
     } finally {
       setSaving(false);
       finishTopLoading();
@@ -62,6 +61,6 @@ export default function SettingsForm({ initial }: { initial: FormState }) {
       <label className="toggle-row"><span><b>Connection request emails</b><small>A heads up when someone asks to connect.</small></span><input type="checkbox" checked={form.emailConnections} onChange={event => check("emailConnections", event.target.checked)} /></label>
       <label className="toggle-row"><span><b>Writing reminders</b><small>Occasional gentle reminders to write someone dear.</small></span><input type="checkbox" checked={form.writingReminders} onChange={event => check("writingReminders", event.target.checked)} /></label>
     </div>
-    <div className="settings-save"><button className="button" disabled={saving}>{saving ? "Saving…" : "Save your settings"}</button>{status && <span role="status">{status}</span>}</div>
+    <div className="settings-save"><button className="button" disabled={saving}>{saving ? "Saving…" : "Save your settings"}</button></div>
   </form>;
 }
