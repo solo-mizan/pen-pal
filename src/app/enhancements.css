@@ -1,0 +1,15 @@
+.timezone-note{font-size:10px;color:#898276;letter-spacing:normal;line-height:1.5}
+
+@media(max-width:760px){
+  .admin-page>header{padding:0 18px}
+  .admin-content{margin:38px auto 60px;padding:0 17px}
+  .admin-content>h1{font-size:33px}
+  .admin-stats{grid-template-columns:repeat(2,1fr)}
+  .admin-stats>div:nth-child(2n){border-right:0}
+  .admin-stats>div:last-child{border-top:1px solid #e0d9cd}
+  .admin-card{padding:22px 18px}
+  .admin-mode{align-items:flex-start;flex-direction:column}
+  .admin-range{flex-wrap:wrap}
+  .admin-actions{align-items:flex-start;flex-direction:column}
+  .mail-sidebar{grid-template-columns:1fr repeat(5,auto)}
+}

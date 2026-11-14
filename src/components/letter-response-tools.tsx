@@ -1,5 +1,38 @@
 "use client";
+
 import { useState } from "react";
 import { setLetterFavorite, setLetterReaction } from "@/actions/mail";
-const options=["♥","☺","✿","☀"];
-export default function LetterResponseTools({id,initialFavorite,initialReaction}:{id:string;initialFavorite:boolean;initialReaction:string}){const [favorite,setFavorite]=useState(initialFavorite);const [reaction,setReaction]=useState(initialReaction);const [notice,setNotice]=useState("");async function toggle(){const next=!favorite;const result=await setLetterFavorite(id,next);if(result.ok)setFavorite(next);else setNotice(result.error||"Could not update favorite.");}async function react(emoji:string){const result=await setLetterReaction(id,emoji);if(result.ok)setReaction(emoji);else setNotice(result.error||"Could not add reaction.");}return <div className="letter-response"><button className={favorite?"favorite active":"favorite"} onClick={toggle} aria-pressed={favorite}>{favorite?"♥":"♡"} {favorite?"Saved to favorites":"Keep this letter"}</button><div><span>Send a little feeling</span>{options.map(o=><button key={o} className={reaction===o?"reaction active":"reaction"} aria-label={`React ${o}`} onClick={()=>react(o)}>{o}</button>)}</div>{notice&&<small role="status">{notice}</small>}</div>}
+import { finishTopLoading, startTopLoading } from "@/lib/top-loading";
+
+const options = ["♥", "☺", "✿", "☀"];
+
+export default function LetterResponseTools({ id, initialFavorite, initialReaction }: { id: string; initialFavorite: boolean; initialReaction: string }) {
+  const [favorite, setFavorite] = useState(initialFavorite);
+  const [reaction, setReaction] = useState(initialReaction);
+  const [notice, setNotice] = useState("");
+
+  async function toggle() {
+    startTopLoading();
+    try {
+      const next = !favorite;
+      const result = await setLetterFavorite(id, next);
+      if (result.ok) setFavorite(next);
+      else setNotice(result.error || "Could not update favorite.");
+    } finally {
+      finishTopLoading();
+    }
+  }
+
+  async function react(emoji: string) {
+    startTopLoading();
+    try {
+      const result = await setLetterReaction(id, emoji);
+      if (result.ok) setReaction(emoji);
+      else setNotice(result.error || "Could not add reaction.");
+    } finally {
+      finishTopLoading();
+    }
+  }
+
+  return <div className="letter-response"><button className={favorite ? "favorite active" : "favorite"} onClick={toggle} aria-pressed={favorite}>{favorite ? "♥" : "♡"} {favorite ? "Saved to favorites" : "Keep this letter"}</button><div><span>Send a little feeling</span>{options.map(emoji => <button key={emoji} className={reaction === emoji ? "reaction active" : "reaction"} aria-label={`React ${emoji}`} onClick={() => react(emoji)}>{emoji}</button>)}</div>{notice && <small role="status">{notice}</small>}</div>;
+}

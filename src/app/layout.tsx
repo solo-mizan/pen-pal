@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AuthProvider from "@/components/auth-provider";
+import TopLoadingBar from "@/components/top-loading-bar";
 import { clerkConfigured } from "@/lib/config";
 import "./globals.css";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body><AuthProvider enabled={clerkConfigured}>{children}</AuthProvider></body>
+      <body><AuthProvider enabled={clerkConfigured}>{children}<TopLoadingBar /></AuthProvider></body>
     </html>
   );
 }

@@ -3,11 +3,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db";
-import { deliveryDelayDays, deliverDueLetters } from "@/lib/delivery";
+import { deliverDueLetters } from "@/lib/delivery";
 import { requireAppUser } from "@/lib/auth";
 import { Connection, Letter, Notification, User } from "@/models";
 import { connectionSchema, letterSchema, preferencesSchema, profileSchema } from "@/lib/validators";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { getDeliverySettings } from "@/lib/delivery-settings";
+import { deliveryDelayDays } from "@/lib/domain";
 
 export async function saveProfile(input: unknown) {
   const parsed = profileSchema.safeParse(input);
@@ -109,11 +111,13 @@ export async function sendLetter(input: unknown) {
         if (asset.context?.custom?.ownerId !== sender.clerkId) return { ok: false, error: "An attachment does not belong to your account." };
       }
     }
-    const delayDays = deliveryDelayDays();
+    const deliverySettings = await getDeliverySettings();
+    const delayDays = deliveryDelayDays(Math.random, deliverySettings);
     const sentAt = new Date();
     const deliverAt = new Date(sentAt.getTime() + delayDays * 24 * 60 * 60 * 1000);
     const conversationId = [sender.clerkId, data.recipientId].sort().join(":");
     await Letter.create({ ...data, senderId: sender.clerkId, connectionId: connection._id, delayDays, sentAt, deliverAt, status: "scheduled", conversationId, photos: data.photos.map((photo: { publicId: string; format?: string; width?: number; height?: number; bytes: number }) => ({ publicId: photo.publicId, format: photo.format, width: photo.width, height: photo.height, bytes: photo.bytes })) });
+    if (delayDays === 0) await deliverDueLetters(sentAt);
     revalidatePath("/mailbox"); revalidatePath("/outbox");
     return { ok: true, delayDays, deliverAt: deliverAt.toISOString() };
   } catch (error) {

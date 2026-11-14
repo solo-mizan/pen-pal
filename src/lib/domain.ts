@@ -1,7 +1,10 @@
 import { createHash } from "node:crypto";
 
-export function deliveryDelayDays(random = Math.random): number {
-  return 3 + Math.floor(random() * 5);
+export type DeliverySettings = { mode: "random" | "instant"; minDays: number; maxDays: number };
+
+export function deliveryDelayDays(random = Math.random, settings: DeliverySettings = { mode: "random", minDays: 3, maxDays: 7 }): number {
+  if (settings.mode === "instant") return 0;
+  return settings.minDays + Math.floor(random() * (settings.maxDays - settings.minDays + 1));
 }
 
 export function profileUsernameBase(username: string | null | undefined, firstName: string | null | undefined) {

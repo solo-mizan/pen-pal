@@ -7,7 +7,7 @@ const userSchema = new Schema({
   email: { type: String, required: true, lowercase: true, trim: true },
   imageUrl: { type: String, default: "" },
   preferredLanguage: { type: String, enum: ["en", "bn"], default: "en" },
-  timezone: { type: String, default: "UTC" },
+  timezone: { type: String, default: "Asia/Dhaka" },
   notifications: { emailLetters: { type: Boolean, default: true }, emailConnections: { type: Boolean, default: true }, writingReminders: { type: Boolean, default: false } },
   lastWritingReminderAt: Date,
   profileVisible: { type: Boolean, default: true },
@@ -36,7 +36,7 @@ const letterSchema = new Schema({
   ink: { type: String, enum: ["brown", "sage", "blue", "rose"], default: "brown" },
   photos: { type: [photoSchema], default: [], validate: (v: unknown[]) => v.length <= 5 },
   status: { type: String, enum: ["draft", "scheduled", "delivered"], default: "draft", index: true },
-  delayDays: { type: Number, min: 3, max: 7 }, sentAt: Date, deliverAt: Date, deliveredAt: Date, openedAt: Date,
+  delayDays: { type: Number, min: 0, max: 30 }, sentAt: Date, deliverAt: Date, deliveredAt: Date, openedAt: Date,
   favoriteBy: { type: [String], default: [] }, reaction: { emoji: String, by: String },
   conversationId: { type: String, index: true }, parentLetterId: { type: Schema.Types.ObjectId, ref: "Letter" },
 }, { timestamps: true });
@@ -54,9 +54,17 @@ notificationSchema.index({ userId: 1, createdAt: -1 });
 const rateLimitSchema = new Schema({ _id: String, count: { type: Number, required: true }, expiresAt: { type: Date, required: true } }, { versionKey: false });
 rateLimitSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+const appSettingsSchema = new Schema({
+  _id: { type: String, default: "global" },
+  deliveryMode: { type: String, enum: ["random", "instant"], default: "random" },
+  deliveryMinDays: { type: Number, min: 0, max: 30, default: 3 },
+  deliveryMaxDays: { type: Number, min: 0, max: 30, default: 7 },
+}, { timestamps: true, versionKey: false });
+
 export type UserDoc = InferSchemaType<typeof userSchema>;
 export const User = mongoose.models.User ?? mongoose.model("User", userSchema);
 export const Connection = mongoose.models.Connection ?? mongoose.model("Connection", connectionSchema);
 export const Letter = mongoose.models.Letter ?? mongoose.model("Letter", letterSchema);
 export const Notification = mongoose.models.Notification ?? mongoose.model("Notification", notificationSchema);
 export const RateLimit = mongoose.models.RateLimit ?? mongoose.model("RateLimit", rateLimitSchema);
+export const AppSettings = mongoose.models.AppSettings ?? mongoose.model("AppSettings", appSettingsSchema);
