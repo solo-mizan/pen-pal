@@ -14,7 +14,7 @@ export async function POST(){
   if(!cloudName||!apiKey||!apiSecret)return NextResponse.json({ok:false,error:"Photo uploads are not configured yet."},{status:503});
   cloudinary.config({cloud_name:cloudName,api_key:apiKey,api_secret:apiSecret});
   const timestamp=Math.floor(Date.now()/1000),publicId=randomUUID(),folder="dear-letter/private",context=`ownerId=${userId}`;
-  const allowed_formats="jpg,png,webp",max_file_size=10_485_760;
-  const params={allowed_formats,context,folder,max_file_size,public_id:publicId,timestamp,type:"authenticated"};
-  return NextResponse.json({ok:true,cloudName,apiKey,timestamp,publicId,folder,context,allowed_formats,max_file_size,signature:cloudinary.utils.api_sign_request(params,apiSecret)});
+  const allowed_formats="jpg,png,webp";
+  const params={allowed_formats,context,folder,public_id:publicId,timestamp,type:"authenticated"};
+  return NextResponse.json({ok:true,cloudName,apiKey,timestamp,publicId,folder,context,allowed_formats,signature:cloudinary.utils.api_sign_request(params,apiSecret)});
 }

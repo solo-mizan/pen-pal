@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Clock3, Feather, Mail, MailOpen, Send, ShieldCheck, Sparkles } from "lucide-react";
 import ArrivalBadge from "@/components/arrival-badge";
 import AuthControls from "@/components/auth-controls";
+import HomeMailboxCta from "@/components/home-mailbox-cta";
 
 const steps = [
   { icon: Feather, n: "01", title: "Write something real", body: "Take a breath. Find the right words. Add a photograph if you like." },
@@ -23,7 +24,7 @@ export default function Home() {
           <div className="eyebrow"><span /> A slower kind of connection</div>
           <h1>Some things<br />are worth <em>waiting for.</em></h1>
           <p className="hero-text">A quiet place to write to the people you love. Your letters take the long way there — so the anticipation becomes part of the gift.</p>
-          <div className="hero-buttons"><Link className="button" href="/sign-up">Send a little something <ArrowRight size={16} /></Link><a className="text-link" href="#how-it-works">See how it works <span>↓</span></a></div>
+          <div className="hero-buttons"><HomeMailboxCta className="button">Send a little something <ArrowRight size={16} /></HomeMailboxCta><a className="text-link" href="#how-it-works">See how it works <span>↓</span></a></div>
           <div className="hero-note"><span className="avatars"><b>A</b><b>M</b><b>✿</b></span><span>Made for the people<br />you think about most.</span></div>
         </div>
         <div className="hero-art" aria-label="Illustration of a letter waiting to be opened">
@@ -52,7 +53,7 @@ export default function Home() {
         <div className="promise-copy"><div className="eyebrow"><span /> A note, not a notification</div><h2>Give a thought<br />some <em>room to land.</em></h2><p>No typing bubbles. No pressure to reply right away. Just a letter, sealed until its time, and a person who knows you thought of them.</p><div className="promise-list"><span><ShieldCheck size={16}/> Private between you two</span><span><Clock3 size={16}/> Delivered in 3–7 days</span><span><Sparkles size={16}/> Yours to keep, always</span></div></div>
       </section>
 
-      <section className="closing"><span className="closing-stamp">✳</span><div className="section-kicker">The mailbox is waiting</div><h2>Someone would love<br />to hear from <em>you.</em></h2><Link href="/sign-up" className="button">Make your mailbox <ArrowRight size={16}/></Link><small>Free to start · Always personal</small></section>
+      <section className="closing"><span className="closing-stamp">✳</span><div className="section-kicker">The mailbox is waiting</div><h2>Someone would love<br />to hear from <em>you.</em></h2><HomeMailboxCta className="button">Make your mailbox <ArrowRight size={16}/></HomeMailboxCta><small>Free to start · Always personal</small></section>
       <footer className="footer"><Link className="brand" href="/"><span className="brand-mark"><Mail size={17}/></span> dear, <i>letter</i></Link><span>Made slowly, for the people who matter.</span><span>© 2026 dear, letter</span></footer>
     </main>
   );
