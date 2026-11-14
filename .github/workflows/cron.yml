@@ -15,7 +15,7 @@ jobs:
       - name: Call Vercel API Endpoint
         env:
           CRON_SECRET: "c1d4f4b7f0a9d49d3ae38e0d3f6d4584d58d3a02ca9b4ee7f0d078e39d3b2c0b"
-          VERCEL_URL: "https://amarchithi.vercel.app/api/cron/deliver"
+          VERCEL_URL: "https://letter.asf.run/api/cron/deliver"
         run: |
           echo "Triggering cron endpoint..."
           
