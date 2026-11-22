@@ -29,10 +29,10 @@ export async function updatePreferences(input: unknown) {
   if (!parsed.success) return { ok: false, error: "Check the profile details and try again." };
   try {
     const user = await requireAppUser();
-    const { emailLetters, emailConnections, writingReminders, ...profile } = parsed.data;
+    const profile = parsed.data;
     const duplicate = await User.findOne({ username: profile.username.toLowerCase(), clerkId: { $ne: user.clerkId } }).lean();
     if (duplicate) return { ok: false, error: "That username is already taken." };
-    await User.updateOne({ clerkId: user.clerkId }, { $set: { ...profile, username: profile.username.toLowerCase(), notifications: { emailLetters, emailConnections, writingReminders } } });
+    await User.updateOne({ clerkId: user.clerkId }, { $set: { ...profile, username: profile.username.toLowerCase() } });
     revalidatePath("/settings"); revalidatePath("/mailbox");
     return { ok: true };
   } catch { return { ok: false, error: "Could not save your settings." }; }
@@ -54,16 +54,6 @@ export async function sendConnectionRequest(input: unknown) {
     if (existing) { existing.status = "pending"; existing.requesterId = user.clerkId; existing.recipientId = target.clerkId; await existing.save(); }
     else await Connection.create({ participants: pair, pairKey, requesterId: user.clerkId, recipientId: target.clerkId });
     await Notification.create({ userId: target.clerkId, type: "connection_request", relatedId: user.clerkId, message: `${user.displayName} would like to exchange letters.` });
-    if (target.email && process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
-      try {
-        const preferences = await User.findOne({ clerkId: target.clerkId }).select("notifications.emailConnections").lean();
-        if (preferences?.notifications?.emailConnections) {
-          const { Resend } = await import("resend");
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://example.com";
-          await new Resend(process.env.RESEND_API_KEY).emails.send({ from: process.env.EMAIL_FROM, to: target.email, subject: "Someone would like to connect", html: `<div style="font-family:Georgia,serif;background:#f8f5ef;padding:40px;color:#302c27"><h1 style="font-weight:400">A little hello is waiting.</h1><p>${user.displayName.replace(/[&<>"']/g, "").slice(0, 60)} would like to exchange letters with you.</p><a href="${appUrl}/connections" style="display:inline-block;margin-top:12px;padding:13px 18px;background:#62694f;color:#fff;text-decoration:none">See the request</a></div>` });
-        }
-      } catch (error) { console.error("Connection request email failed", error); }
-    }
     revalidatePath("/connections");
     return { ok: true };
   } catch { return { ok: false, error: "Could not send the request. Please try again." }; }
@@ -144,15 +134,6 @@ export async function setLetterFavorite(id: string, favorite: boolean) {
     const result = await Letter.updateOne({ _id: id, recipientId: user.clerkId, status: "delivered" }, update);
     return result.modifiedCount === 1 || result.matchedCount === 1 ? { ok: true } : { ok: false, error: "Letter not found." };
   } catch { return { ok: false, error: "Could not update this letter." }; }
-}
-
-export async function setLetterReaction(id: string, emoji: string) {
-  if (!["♥", "☺", "✿", "☀"].includes(emoji)) return { ok: false, error: "Choose one of the available reactions." };
-  try {
-    const user = await requireAppUser();
-    const result = await Letter.updateOne({ _id: id, recipientId: user.clerkId, status: "delivered" }, { $set: { reaction: { emoji, by: user.clerkId } } });
-    return result.matchedCount === 1 ? { ok: true } : { ok: false, error: "Letter not found." };
-  } catch { return { ok: false, error: "Could not add a reaction." }; }
 }
 
 export async function fallbackDelivery() {

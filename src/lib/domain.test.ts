@@ -4,8 +4,8 @@ import { letterSchema } from "./validators";
 import { formatLocalDate } from "./dates";
 
 describe("delayed delivery rules", () => {
-  it("selects whole day delays from three through seven, inclusive", () => {
-    expect([0, 0.2, 0.4, 0.6, 0.8, 0.999].map(n => deliveryDelayDays(() => n))).toEqual([3, 4, 5, 6, 7, 7]);
+  it("selects whole day delays from two through three, inclusive", () => {
+    expect([0, 0.2, 0.4, 0.6, 0.8, 0.999].map(n => deliveryDelayDays(() => n))).toEqual([2, 2, 2, 3, 3, 3]);
   });
 });
 

@@ -1,7 +1,7 @@
 import { AppSettings } from "@/models";
 import type { DeliverySettings } from "@/lib/domain";
 
-export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = { mode: "random", minDays: 3, maxDays: 7 };
+export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = { mode: "random", minDays: 2, maxDays: 3 };
 
 export async function getDeliverySettings(): Promise<DeliverySettings> {
   const saved = await AppSettings.findById("global").lean();

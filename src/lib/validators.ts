@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const profileSchema = z.object({ username: z.string().trim().min(3).max(24).regex(/^[a-zA-Z0-9_]+$/), displayName: z.string().trim().min(1).max(60) });
-export const preferencesSchema = profileSchema.extend({ preferredLanguage: z.enum(["en","bn"]), timezone: z.string().trim().min(1).max(80).refine(value => { try { new Intl.DateTimeFormat("en", { timeZone: value }); return true; } catch { return false; } }, "Choose a valid timezone, such as Asia/Dhaka."), profileVisible: z.boolean(), emailLetters: z.boolean(), emailConnections: z.boolean(), writingReminders: z.boolean() });
+export const preferencesSchema = profileSchema.extend({ preferredLanguage: z.enum(["en","bn"]), timezone: z.string().trim().min(1).max(80).refine(value => { try { new Intl.DateTimeFormat("en", { timeZone: value }); return true; } catch { return false; } }, "Choose a valid timezone, such as Asia/Dhaka."), profileVisible: z.boolean() });
 export const connectionSchema = z.object({ username: z.string().trim().min(3).max(24).regex(/^[a-zA-Z0-9_]+$/) });
 export const letterSchema = z.object({
   recipientId: z.string().min(1), subject: z.string().trim().max(100).default(""), greeting: z.string().trim().max(120).default(""),

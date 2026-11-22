@@ -4,8 +4,8 @@ test("the home page introduces the delayed letter exchange", async ({ page }) =>
   await page.goto("/");
   await expect(page).toHaveTitle(/dear, letter/);
   await expect(page.getByRole("heading", { name: /Some things are worth waiting for/i })).toBeVisible();
-  await expect(page.getByText("Letters travel in 3–7 days")).toBeVisible();
-  await expect(page.getByRole("link", { name: /Write your first letter/i })).toHaveAttribute("href", "/sign-up");
+  await expect(page.getByRole("heading", { name: /Messages are fast/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Write your first letter/i }).first()).toHaveAttribute("href", "/sign-up");
 });
 
 test("sign-in route renders the Clerk entry point or local setup guidance", async ({ page }) => {

@@ -11,9 +11,6 @@ type FormState = {
   preferredLanguage: "en" | "bn";
   timezone: string;
   profileVisible: boolean;
-  emailLetters: boolean;
-  emailConnections: boolean;
-  writingReminders: boolean;
 };
 
 export default function SettingsForm({ initial }: { initial: FormState }) {
@@ -24,7 +21,7 @@ export default function SettingsForm({ initial }: { initial: FormState }) {
     setForm(previous => ({ ...previous, [field]: value }));
   }
 
-  function check(field: "profileVisible" | "emailLetters" | "emailConnections" | "writingReminders", value: boolean) {
+  function check(field: "profileVisible", value: boolean) {
     setForm(previous => ({ ...previous, [field]: value }));
   }
 
@@ -54,12 +51,6 @@ export default function SettingsForm({ initial }: { initial: FormState }) {
     <div className="settings-group">
       <span className="section-kicker">A LITTLE PRIVACY</span>
       <label className="toggle-row"><span><b>Discoverable by username</b><small>People can find you when they know your username.</small></span><input type="checkbox" checked={form.profileVisible} onChange={event => check("profileVisible", event.target.checked)} /></label>
-    </div>
-    <div className="settings-group">
-      <span className="section-kicker">NOTES FROM YOUR MAILBOX</span>
-      <label className="toggle-row"><span><b>Letter arrival emails</b><small>A note when a letter reaches your mailbox.</small></span><input type="checkbox" checked={form.emailLetters} onChange={event => check("emailLetters", event.target.checked)} /></label>
-      <label className="toggle-row"><span><b>Connection request emails</b><small>A heads up when someone asks to connect.</small></span><input type="checkbox" checked={form.emailConnections} onChange={event => check("emailConnections", event.target.checked)} /></label>
-      <label className="toggle-row"><span><b>Writing reminders</b><small>Occasional gentle reminders to write someone dear.</small></span><input type="checkbox" checked={form.writingReminders} onChange={event => check("writingReminders", event.target.checked)} /></label>
     </div>
     <div className="settings-save"><button className="button" disabled={saving}>{saving ? "Saving…" : "Save your settings"}</button></div>
   </form>;

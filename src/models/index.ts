@@ -8,7 +8,6 @@ const userSchema = new Schema({
   imageUrl: { type: String, default: "" },
   preferredLanguage: { type: String, enum: ["en", "bn"], default: "en" },
   timezone: { type: String, default: "Asia/Dhaka" },
-  notifications: { emailLetters: { type: Boolean, default: true }, emailConnections: { type: Boolean, default: true }, writingReminders: { type: Boolean, default: false } },
   lastWritingReminderAt: Date,
   profileVisible: { type: Boolean, default: true },
 }, { timestamps: true });
@@ -37,7 +36,8 @@ const letterSchema = new Schema({
   photos: { type: [photoSchema], default: [], validate: (v: unknown[]) => v.length <= 5 },
   status: { type: String, enum: ["draft", "scheduled", "delivered"], default: "draft", index: true },
   delayDays: { type: Number, min: 0, max: 30 }, sentAt: Date, deliverAt: Date, deliveredAt: Date, openedAt: Date,
-  favoriteBy: { type: [String], default: [] }, reaction: { emoji: String, by: String },
+  pushNotificationPendingAt: Date, pushNotifiedAt: Date, pushNotificationClaimedAt: Date, pushNotificationClaimId: String,
+  favoriteBy: { type: [String], default: [] },
   conversationId: { type: String, index: true }, parentLetterId: { type: Schema.Types.ObjectId, ref: "Letter" },
 }, { timestamps: true });
 letterSchema.index({ recipientId: 1, status: 1, deliverAt: 1 });
@@ -57,8 +57,8 @@ rateLimitSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 const appSettingsSchema = new Schema({
   _id: { type: String, default: "global" },
   deliveryMode: { type: String, enum: ["random", "instant"], default: "random" },
-  deliveryMinDays: { type: Number, min: 0, max: 30, default: 3 },
-  deliveryMaxDays: { type: Number, min: 0, max: 30, default: 7 },
+  deliveryMinDays: { type: Number, min: 0, max: 30, default: 2 },
+  deliveryMaxDays: { type: Number, min: 0, max: 30, default: 3 },
 }, { timestamps: true, versionKey: false });
 
 export type UserDoc = InferSchemaType<typeof userSchema>;
@@ -68,3 +68,10 @@ export const Letter = mongoose.models.Letter ?? mongoose.model("Letter", letterS
 export const Notification = mongoose.models.Notification ?? mongoose.model("Notification", notificationSchema);
 export const RateLimit = mongoose.models.RateLimit ?? mongoose.model("RateLimit", rateLimitSchema);
 export const AppSettings = mongoose.models.AppSettings ?? mongoose.model("AppSettings", appSettingsSchema);
+
+const pushSubscriptionSchema = new Schema({
+  userId: { type: String, required: true, index: true },
+  endpoint: { type: String, required: true, unique: true },
+  keys: { p256dh: { type: String, required: true }, auth: { type: String, required: true } },
+}, { timestamps: true });
+export const PushSubscription = mongoose.models.PushSubscription ?? mongoose.model("PushSubscription", pushSubscriptionSchema);
