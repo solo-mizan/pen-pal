@@ -1,6 +1,7 @@
 import { Letter, PushSubscription as PushSubscriptionRecord, User } from "@/models";
 import { formatLocalDate } from "@/lib/dates";
 import { randomUUID } from "node:crypto";
+import { sendNotification, setVapidDetails } from "web-push";
 
 const CLAIM_LEASE_MS = 10 * 60 * 1000;
 
@@ -19,8 +20,7 @@ export async function sendPendingLetterPushNotifications(now = new Date()) {
   const config = pushConfig();
   if (!config) return 0;
 
-  const webpush = (await import("web-push")).default;
-  webpush.setVapidDetails(config.subject, config.publicKey, config.privateKey);
+  setVapidDetails(config.subject, config.publicKey, config.privateKey);
   const staleClaim = new Date(now.getTime() - CLAIM_LEASE_MS);
   const candidates = await Letter.find({ status: "delivered", pushNotificationPendingAt: { $exists: true }, pushNotifiedAt: { $exists: false } })
     .select("_id recipientId senderId sentAt")
@@ -66,7 +66,7 @@ export async function sendPendingLetterPushNotifications(now = new Date()) {
 
     for (const subscription of subscriptions) {
       try {
-        await webpush.sendNotification(
+        await sendNotification(
           { endpoint: subscription.endpoint, keys: subscription.keys },
           payload,
           { TTL: 60 * 60 * 24, urgency: "normal", topic: String(candidate._id) },
