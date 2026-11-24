@@ -392,6 +392,18 @@ main .open-link,
 main .push-device-note,
 main .timezone-note { font-size: .875rem; }
 
+.admin-deliver-all { margin-top: 1.6rem; padding-top: 1.25rem; border-top: 1px solid #e9e3d9; }
+.admin-deliver-all h3 { margin: 0 0 .4rem; color: #302c24; font: 1.25rem/1.4 var(--serif); }
+.admin-deliver-all > p, .admin-delivery-confirm > p { max-width: 62ch; color: #514c43; font-size: 1rem; line-height: 1.6; }
+.admin-deliver-all-trigger { min-height: 48px; padding: .7rem 1rem; border: 1px solid #8f5145; border-radius: 3px; background: #a35d50; color: #fff; font: 500 1rem var(--sans); cursor: pointer; }
+.admin-deliver-all-trigger:hover:not(:disabled) { background: #87483d; }
+.admin-deliver-all-trigger:disabled { cursor: not-allowed; opacity: .58; }
+.admin-deliver-all > .quiet-button { min-height: 48px; }
+.admin-delivery-confirm { margin-top: 1rem; padding: 1rem; border: 1px solid #dfc4b8; background: #fcf6f1; }
+.admin-delivery-confirm > p { margin-top: 0; }
+.admin-delivery-confirm > div { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.admin-delivery-confirm .quiet-button { margin: 0; min-height: 48px; }
+
 @media (max-width: 760px) {
   main.landing .promise.story-promise .promise-art .paper-note p,
   main.landing .promise-copy > p { font-size: 1.125rem; }

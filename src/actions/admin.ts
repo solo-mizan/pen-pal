@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isSiteAdmin } from "@/lib/admin";
 import { connectDB } from "@/lib/db";
-import { deliverDueLetters } from "@/lib/delivery";
+import { deliverAllScheduledLettersNow, deliverDueLetters } from "@/lib/delivery";
 import { AppSettings } from "@/models";
 
 type DeliverySettingsInput = { mode: "random" | "instant"; minDays: number; maxDays: number };
@@ -44,5 +44,19 @@ export async function processDueLettersNow() {
     return { ok: true, delivered };
   } catch {
     return { ok: false, error: "Could not process due letters." };
+  }
+}
+
+export async function deliverAllScheduledLettersNowAction() {
+  if (!await isSiteAdmin()) return { ok: false, error: "You do not have permission to deliver all letters." };
+  try {
+    await connectDB();
+    const delivered = await deliverAllScheduledLettersNow();
+    revalidatePath("/admin");
+    revalidatePath("/mailbox");
+    revalidatePath("/outbox");
+    return { ok: true, delivered };
+  } catch {
+    return { ok: false, error: "Could not deliver all remaining letters." };
   }
 }

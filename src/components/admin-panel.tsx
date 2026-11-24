@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { processDueLettersNow, saveGlobalDeliverySettings } from "@/actions/admin";
+import { deliverAllScheduledLettersNowAction, processDueLettersNow, saveGlobalDeliverySettings } from "@/actions/admin";
 import type { DeliverySettings } from "@/lib/domain";
 import { finishTopLoading, startTopLoading } from "@/lib/top-loading";
 import { showToast } from "@/lib/toast";
@@ -15,6 +15,7 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
   const [minDays, setMinDays] = useState(settings.minDays);
   const [maxDays, setMaxDays] = useState(settings.maxDays);
   const [busy, setBusy] = useState(false);
+  const [confirmingAll, setConfirmingAll] = useState(false);
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,6 +42,22 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
       if (result.ok) router.refresh();
     } catch {
       showToast("Could not process deliveries. Please try again.", "error");
+    } finally {
+      setBusy(false);
+      finishTopLoading();
+    }
+  }
+
+  async function deliverAll() {
+    setBusy(true);
+    setConfirmingAll(false);
+    startTopLoading();
+    try {
+      const result = await deliverAllScheduledLettersNowAction();
+      showToast(result.ok ? `Delivered ${result.delivered} ${result.delivered === 1 ? "letter" : "letters"} immediately.` : result.error || "Could not deliver the remaining letters.", result.ok ? "success" : "error");
+      if (result.ok) router.refresh();
+    } catch {
+      showToast("Could not deliver the remaining letters. Please try again.", "error");
     } finally {
       setBusy(false);
       finishTopLoading();
@@ -79,6 +96,24 @@ export default function AdminPanel({ settings, stats }: { settings: DeliverySett
       <h2>Process letters that are due.</h2>
       <p>The scheduled job normally handles these automatically. You can run the same delivery process now.</p>
       <button className="quiet-button" type="button" disabled={busy} onClick={processDue}>{busy ? "Working…" : "Process due letters now →"}</button>
+      <div className="admin-deliver-all">
+        <h3>Bring every remaining letter to its recipient.</h3>
+        <p>This immediately delivers every letter still scheduled, even if its arrival date is days away.</p>
+        <button
+          className={confirmingAll ? "quiet-button" : "admin-deliver-all-trigger"}
+          type="button"
+          disabled={busy || (!confirmingAll && stats.scheduled === 0)}
+          aria-expanded={confirmingAll}
+          aria-controls="admin-delivery-confirmation"
+          onClick={() => setConfirmingAll(value => !value)}
+        >
+          {confirmingAll ? "Cancel immediate delivery" : stats.scheduled === 0 ? "No scheduled letters" : `Deliver all ${stats.scheduled} scheduled ${stats.scheduled === 1 ? "letter" : "letters"} now`}
+        </button>
+        {confirmingAll && <div id="admin-delivery-confirmation" className="admin-delivery-confirm" role="group" aria-label="Confirm immediate delivery of all scheduled letters">
+          <p>This cannot be undone. Recipients will see their letters in their mailbox right away.</p>
+          <button className="admin-deliver-all-trigger" type="button" disabled={busy} onClick={deliverAll}>Yes, deliver all now</button>
+        </div>}
+      </div>
     </section>
   </div>;
 }
