@@ -1,0 +1,1 @@
+export const MAX_LETTER_BODY_CHARACTERS = 50_000;

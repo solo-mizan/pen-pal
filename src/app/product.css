@@ -403,6 +403,7 @@ main .timezone-note { font-size: .875rem; }
 .admin-delivery-confirm > p { margin-top: 0; }
 .admin-delivery-confirm > div { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
 .admin-delivery-confirm .quiet-button { margin: 0; min-height: 48px; }
+main .letter-length-note { display: block; margin-top: .35rem; color: #514c43; font: normal .9375rem/1.5 var(--sans); letter-spacing: normal; text-transform: none; }
 
 @media (max-width: 760px) {
   main.landing .promise.story-promise .promise-art .paper-note p,

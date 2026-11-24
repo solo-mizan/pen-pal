@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canAccessLetterPhotos, canRecipientOpenLetter, deliveryDelayDays, profileUsernameBase, usernameAttempt } from "./domain";
 import { letterSchema } from "./validators";
+import { MAX_LETTER_BODY_CHARACTERS } from "./letter-limits";
 import { formatLocalDate } from "./dates";
 
 describe("delayed delivery rules", () => {
@@ -28,6 +29,11 @@ describe("letter access rules", () => {
 });
 
 describe("letter validation", () => {
+  it("accepts a ten-page letter within the expanded character limit", () => {
+    const body = "a".repeat(MAX_LETTER_BODY_CHARACTERS);
+    expect(letterSchema.safeParse({ recipientId: "recipient", body }).success).toBe(true);
+    expect(letterSchema.safeParse({ recipientId: "recipient", body: `${body}a` }).success).toBe(false);
+  });
   it("preserves mixed Bangla and English Unicode letter content", () => {
     const body = "তোমার কথা মনে পড়ল today, so I wrote this little note.";
     const parsed = letterSchema.safeParse({ recipientId: "recipient", body });

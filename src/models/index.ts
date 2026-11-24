@@ -1,4 +1,5 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
+import { MAX_LETTER_BODY_CHARACTERS } from "@/lib/letter-limits";
 
 const userSchema = new Schema({
   clerkId: { type: String, required: true, unique: true, index: true },
@@ -29,7 +30,7 @@ const letterSchema = new Schema({
   senderId: { type: String, required: true, index: true }, recipientId: { type: String, required: true, index: true },
   connectionId: { type: Schema.Types.ObjectId, ref: "Connection", required: true, index: true },
   subject: { type: String, maxlength: 100, default: "" }, greeting: { type: String, maxlength: 120, default: "" },
-  body: { type: String, required: true, maxlength: 12000 }, signature: { type: String, maxlength: 120, default: "" },
+  body: { type: String, required: true, maxlength: MAX_LETTER_BODY_CHARACTERS }, signature: { type: String, maxlength: 120, default: "" },
   stationery: { type: String, enum: ["cream", "vintage", "pastel", "white", "blue"], default: "cream" },
   fontPreference: { type: String, enum: ["caveat", "atma", "serif"], default: "caveat" },
   ink: { type: String, enum: ["brown", "sage", "blue", "rose"], default: "brown" },
